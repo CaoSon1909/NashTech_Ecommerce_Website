@@ -1,0 +1,142 @@
+GO
+
+CREATE DATABASE ecommerce_nashtech COLLATE SQL_Latin1_General_CP1_CS_AS;
+
+GO
+
+USE ecommerce_nashtech;
+
+GO
+
+CREATE TABLE Role(
+	id int primary key not null,
+	name varchar(50) not null,
+	description nvarchar(max)
+);
+
+GO
+
+CREATE TABLE Status(
+	id int primary key not null,
+	name varchar(50) not null,
+	description nvarchar(max)
+);
+
+GO
+
+CREATE TABLE Account(
+	email varchar(320) primary key not null,
+	password varchar(50) not null,
+	phoneNumber char(10) not null,
+	address nvarchar(max) not null,
+	fullname nvarchar(50) not null,
+	birthdate bigInt not null,
+	roleID int foreign key references Role(id) not null,
+	statusID int foreign key references Status(id) not null,
+);
+
+GO
+
+CREATE TABLE Category(
+	id uniqueidentifier primary key not null,
+	name varchar(50) not null,
+	description nvarchar(max)
+);
+
+GO
+
+CREATE TABLE Brand(
+	id uniqueidentifier primary key not null,
+	email varchar(320) not null,
+	name nvarchar(50) not null,
+	address nvarchar(max) not null,
+	website nvarchar(max),
+	phoneNumber char(10) not null
+);
+
+GO
+
+CREATE TABLE Vehicle(
+	id uniqueidentifier primary key not null,
+	name nvarchar(50) not null,
+	color varchar(20) not null,
+	dateOfManufacture bigInt not null,
+	price float not null,
+	quantity int not null,
+	statusID int foreign key references Role(id) not null,
+	categoryID uniqueidentifier foreign key references Category(id) not null,
+	brandID uniqueidentifier foreign key references Brand(id) not null
+);
+
+GO 
+
+CREATE TABLE Payment(
+	id int primary key not null,
+	name varchar(50) not null,
+	description nvarchar(max)
+);
+
+GO
+
+CREATE TABLE CartDetail(
+	id uniqueidentifier primary key not null,
+	userEmail varchar(320) foreign key references Account(email) not null,
+	vehicleID uniqueidentifier foreign key references Vehicle(id) not null,
+	quantity int not null,
+	price float not null
+);
+
+GO
+
+CREATE TABLE Discount(
+	id uniqueidentifier primary key not null,
+	amount float not null,
+	expireDate bigInt not null,
+	description nvarchar(max),
+	statusID int foreign key references Status(id) not null,
+);
+
+GO
+
+CREATE TABLE UserOrder(
+	id uniqueidentifier primary key not null,
+	createDate bigInt not null,
+	subTotal float not null,
+	deliveryAddress nvarchar(max),
+	paymentID int foreign key references Payment(id) not null,
+	userEmail varchar(320) foreign key references Account(email) not null,
+	discountID uniqueidentifier foreign key references Discount(id) not null,
+	statusID int foreign key references Status(id) not null
+);
+
+GO
+
+CREATE TABLE OrderDetail(
+	id uniqueidentifier primary key not null,
+	orderID uniqueidentifier foreign key references UserOrder(id) not null,
+	vehicleID uniqueidentifier foreign key references Vehicle(id) not null,
+	quantity int not null,
+	price float not null
+);
+
+GO
+
+CREATE TABLE Reaction(
+	id int primary key not null,
+	name nvarchar(30) not null,
+	description nvarchar(max)
+);
+
+GO
+
+CREATE TABLE Feedback(
+	id uniqueidentifier primary key not null,
+	userEmail varchar(320) foreign key references Account(email) not null,
+	vehicleID uniqueidentifier foreign key references Vehicle(id) not null,
+	createDate bigInt not null,
+	content nvarchar(max),
+	reactionID int foreign key references Reaction(id) not null
+);
+
+
+--DROP DATABASE ecommerce_nashtech;

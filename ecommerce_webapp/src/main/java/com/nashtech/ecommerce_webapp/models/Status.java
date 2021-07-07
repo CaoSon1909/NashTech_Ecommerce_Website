@@ -8,9 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "Role")
-public class Role implements Serializable {
-
+@Table(name = "Status")
+public class Status implements Serializable {
     @Id
     @Column(name = "id", updatable = false, unique = true, nullable = false)
     private int id;
@@ -20,14 +19,15 @@ public class Role implements Serializable {
     private String description;
 
     //Account
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "status", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private Set<Account> accounts = new HashSet<>();
 
-    public Role() {
+
+    public Status() {
     }
 
-    public Role(int id, String name, String description) {
+    public Status(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;

@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class Test {
-    @Bean
-    CommandLineRunner cmd(){
-        return args -> {
-
-        };
-    }
+//    @Bean
+//    CommandLineRunner cmd(){
+//        return args -> {
+//
+//        };
+//    }
 }

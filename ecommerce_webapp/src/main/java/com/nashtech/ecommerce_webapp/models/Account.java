@@ -3,6 +3,8 @@ package com.nashtech.ecommerce_webapp.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -11,7 +13,7 @@ import java.io.Serializable;
 public class Account implements Serializable {
 
     @Id
-    @Column(name = "email", updatable = false, unique = true, nullable = false)
+    @Column(name = "email", updatable = false, unique = false, nullable = false)
     private String email;
     @Column(name = "password", length = 50, nullable = false)
     private String password;
@@ -23,9 +25,11 @@ public class Account implements Serializable {
     private String fullName;
     @Column(name = "birthdate", nullable = false)
     private long birthDate;
+    @Column(name = "status", nullable = false)
+    private int status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "roleID")
     @JsonBackReference
     private Role role;
 
@@ -35,7 +39,7 @@ public class Account implements Serializable {
     public Account() {
     }
 
-    public Account(String email, String password, String phoneNumber, String address, String fullName, long birthDate, Role role) {
+    public Account(String email, String password, String phoneNumber, String address, String fullName, long birthDate, Role role, int status) {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -43,6 +47,7 @@ public class Account implements Serializable {
         this.fullName = fullName;
         this.birthDate = birthDate;
         this.role = role;
+        this.status = status;
     }
 
     public Account(@JsonProperty("email") String email
@@ -51,7 +56,8 @@ public class Account implements Serializable {
             ,@JsonProperty("address") String address
             ,@JsonProperty("fullName") String fullName
             ,@JsonProperty("birthDate") long birthDate
-            ,@JsonProperty("roleID") int roleID) {
+            ,@JsonProperty("roleID") int roleID
+            ,@JsonProperty("status") int status) {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -59,6 +65,15 @@ public class Account implements Serializable {
         this.fullName = fullName;
         this.birthDate = birthDate;
         this.roleID = roleID;
+        this.status = status;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getEmail() {

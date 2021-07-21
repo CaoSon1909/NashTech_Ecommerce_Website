@@ -1,0 +1,230 @@
+USE [ecommerce_nashtech]
+GO
+--Role
+INSERT INTO [dbo].[Role]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (1
+           ,'admin'
+           ,'admin provip no1 cute')
+GO
+INSERT INTO [dbo].[Role]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (2
+           ,'user'
+           ,'user vip vip hihi')
+--
+--Account
+GO
+INSERT INTO [dbo].[Account]
+           ([email]
+           ,[password]
+           ,[phoneNumber]
+           ,[address]
+           ,[fullname]
+           ,[birthdate]
+           ,[roleID]
+           ,[status])
+     VALUES
+           ('admin'
+           ,'admin'
+           ,'0123456789'
+           ,'admin home'
+           ,'admin cute'
+           ,1510419600000
+           ,1
+           ,1)
+GO
+INSERT INTO [dbo].[Account]
+           ([email]
+           ,[password]
+           ,[phoneNumber]
+           ,[address]
+           ,[fullname]
+           ,[birthdate]
+           ,[roleID]
+           ,[status])
+     VALUES
+           ('user'
+           ,'user'
+           ,'0123456789'
+           ,'user home'
+           ,'user cute'
+           ,1510419600000
+           ,2
+           ,1)
+--
+--Brand
+GO
+INSERT INTO [dbo].[Brand]
+           ([id]
+           ,[email]
+           ,[name]
+           ,[address]
+           ,[website]
+           ,[phoneNumber])
+     VALUES
+           ('a7d5635e-d50d-4f38-ad19-cb74652051bd'
+           ,'toyota@gmail.com'
+           ,'toyota'
+           ,'oversea'
+           ,'https://toyota.com'
+           ,'0123456789')
+GO
+INSERT INTO [dbo].[Brand]
+           ([id]
+           ,[email]
+           ,[name]
+           ,[address]
+           ,[website]
+           ,[phoneNumber])
+     VALUES
+           ('29189b97-ea29-487e-a809-c11510d90bc0'
+           ,'nouvo@gmail.com'
+           ,'nouvo'
+           ,'oversea'
+           ,'https://nouvo.com'
+           ,'0123456789')
+--
+--Category
+GO
+
+INSERT INTO [dbo].[Category]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           ('7f2ad347-b199-45b3-aad7-15abb30eef07'
+           ,'car'
+           ,'nice car with low price !!')
+GO
+INSERT INTO [dbo].[Category]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           ('e0e32854-3ced-4ed7-a0d6-e787a339c812'
+           ,'bike'
+           ,'cute bike with low price !!')
+--
+--Discount
+GO
+
+INSERT INTO [dbo].[Discount]
+           ([id]
+           ,[amount]
+           ,[expireDate]
+           ,[description]
+           ,[status])
+     VALUES
+           ('a25c5b45-634d-48a9-a033-4bc71b1177b0'
+           ,0.5
+           ,0
+           ,'sale 50% for car'
+           ,1)
+GO
+INSERT INTO [dbo].[Discount]
+           ([id]
+           ,[amount]
+           ,[expireDate]
+           ,[description]
+           ,[status])
+     VALUES
+           ('c8dc066b-4bb5-48f0-b36a-854431e7e445'
+           ,0.5
+           ,0
+           ,'sale 50% for bike'
+           ,1)
+--
+--Payment
+GO
+INSERT INTO [dbo].[Payment]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (1
+           ,'Cash'
+           ,'Cash Payment')
+GO
+INSERT INTO [dbo].[Payment]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (2
+           ,'Visa'
+           ,'Visa Payment')
+--
+--Reaction
+GO
+
+INSERT INTO [dbo].[Reaction]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (1
+           ,'like'
+           ,'like reaction')
+GO
+INSERT INTO [dbo].[Reaction]
+           ([id]
+           ,[name]
+           ,[description])
+     VALUES
+           (2
+           ,'dislike'
+           ,'dislike reaction')
+--
+--Vehicle
+GO
+
+INSERT INTO [dbo].[Vehicle]
+           ([id]
+           ,[name]
+           ,[color]
+           ,[dateOfManufacture]
+           ,[price]
+           ,[quantity]
+           ,[status]
+           ,[categoryID]
+           ,[brandID])
+     VALUES
+           ('14c67236-5c5c-4520-8372-16e393e7e512'
+           ,'Toyota Y1 Lester'
+           ,'white'
+           ,1447952400000
+           ,5000
+           ,1000
+           ,1
+           ,'7F2AD347-B199-45B3-AAD7-15ABB30EEF07'
+           ,'A7D5635E-D50D-4F38-AD19-CB74652051BD')
+GO
+INSERT INTO [dbo].[Vehicle]
+           ([id]
+           ,[name]
+           ,[color]
+           ,[dateOfManufacture]
+           ,[price]
+           ,[quantity]
+           ,[status]
+           ,[categoryID]
+           ,[brandID])
+     VALUES
+           ('cd0aa305-184c-4ff8-96a2-c75f292f4d95'
+           ,'Nouvo U5 Apocalypse'
+           ,'brown'
+           ,1392397200000
+           ,4000
+           ,2000
+           ,1
+           ,'E0E32854-3CED-4ED7-A0D6-E787A339C812'
+           ,'29189B97-EA29-487E-A809-C11510D90BC0')
+--
+

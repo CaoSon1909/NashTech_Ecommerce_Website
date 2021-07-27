@@ -1,8 +1,13 @@
 package com.nashtech.ecommerce_webapp.services;
 
 import com.nashtech.ecommerce_webapp.dtos.SigninResponseDTO;
+import com.nashtech.ecommerce_webapp.dtos.SignupRequestDTO;
+import com.nashtech.ecommerce_webapp.dtos.SignupResponseDTO;
 import com.nashtech.ecommerce_webapp.exceptions.CustomException;
+import com.nashtech.ecommerce_webapp.models.user.Role;
+import com.nashtech.ecommerce_webapp.models.user.RoleName;
 import com.nashtech.ecommerce_webapp.models.user.User;
+import com.nashtech.ecommerce_webapp.repositories.RoleRepository;
 import com.nashtech.ecommerce_webapp.repositories.UserRepository;
 import com.nashtech.ecommerce_webapp.security.JwtTokenProvider;
 import com.nashtech.ecommerce_webapp.security.UserDetailsImpl;
@@ -20,8 +25,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +36,9 @@ public class UserService{
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -66,42 +76,56 @@ public class UserService{
         }
     }
 
-    //Sign up
-    public String signUp(User user){
-        if (!repository.existsByEmail(user.getEmail())){
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            repository.save(user);
-            return new String("Sign up success");
+    private User resolveUserFromSignupRequest(SignupRequestDTO dto){
+        Set<Role> roles = new HashSet<>();
+        Set<String> strRoles = dto.getRoles();
+        if (strRoles == null){
+            Role userRole = roleRepository.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
         }
         else{
-            throw new CustomException("Email is already in use", HttpStatus.UNPROCESSABLE_ENTITY);
+            strRoles.forEach(role -> {
+                switch (role){
+                    case "ADMIN":
+                        Role adminRole = roleRepository.findByName(RoleName.ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(adminRole);
+                        break;
+                    default:
+                        Role userRole = roleRepository.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
         }
+        User user = new User();
+        user.setRoles(roles);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhoneNum());
+        user.setAddress(dto.getAddress());
+        user.setFullName(dto.getFullName());
+        user.setBirthDate(dto.getBirthdate());
+        user.setStatus(1);
+        return user;
     }
 
-    //get accessing user
-    public User whoAmI(HttpServletRequest request){
-        return repository.findByEmail(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(request)));
+    private boolean checkRetypePassword(SignupRequestDTO dto){
+        String password = dto.getPassword().trim();
+        String retypePass = dto.getRetypePassword().trim();
+        return password.matches(retypePass) ? true : false;
     }
 
-//    public String refresh(String username) {
-//        return jwtTokenProvider.createToken(username, repository.findByEmail(username).getRoles());
-//    }
+    //Sign up
+    @Transactional
+    public User signUp(SignupRequestDTO dto){
+        if (!repository.existsByEmail(dto.getEmail()) && checkRetypePassword(dto)){
+            User user = resolveUserFromSignupRequest(dto);
+            User result = repository.save(user);
+            return result;
+        }
+        return null;
+    }
 
-//    @Transactional
-//    public boolean createAccount(User account){
-//        String nativeQuery = "INSERT INTO Account (email, password, phoneNumber, address, fullname, birthdate, roleID, status) " +
-//                "VALUES (?,?,?,?,?,?,?,?)";
-//        return em.createNativeQuery(nativeQuery)
-//                .setParameter(1, account.getEmail())
-//                .setParameter(2, account.getPassword())
-//                .setParameter(3, account.getPhoneNumber())
-//                .setParameter(4, account.getAddress())
-//                .setParameter(5, account.getFullName())
-//                .setParameter(6, account.getBirthDate())
-//                .setParameter(7, account.getRoleID())
-//                .setParameter(8, account.getStatus())
-//                .executeUpdate() > 0;
-//    }
+
     //Get all account
     @Transactional
     public List<User> getAll(){
@@ -123,27 +147,26 @@ public class UserService{
         return null;
     }
     //TODO: Update account
-//    @Transactional
-//    public boolean updateAccount(User account){
-//        boolean isExisted = isExistedAccount(account);
-//        if (isExisted){
-//            String nativeQuery = "UPDATE Account SET password = ?, " +
-//                    "phoneNumber = ?, address = ?, fullname = ?, birthdate = ?, " +
-//                    "roleID = ? , status = ? WHERE email = ?";
-//            int impactedRow = em.createNativeQuery(nativeQuery)
-//                    .setParameter(1, account.getPassword())
-//                    .setParameter(2, account.getPhoneNumber())
-//                    .setParameter(3, account.getAddress())
-//                    .setParameter(4, account.getFullName())
-//                    .setParameter(5, account.getBirthDate())
-//                    .setParameter(6, account.getRoleID())
-//                    .setParameter(7, account.getStatus())
-//                    .setParameter(8, account.getEmail())
-//                    .executeUpdate();
-//            return impactedRow > 0;
-//        }
-//        return false;
-//    }
+    @Transactional
+    public boolean updateAccount(User account){
+        User result = getAccountByEmail(account.getEmail());
+        if (result != null){
+            String nativeQuery = "UPDATE Userr SET email = ?, password = ?, phoneNumber = ?, address = ?, " +
+                    "fullname = ?, birthdate = ?, status = ? WHERE id = ?";
+            int impactedRow = em.createNativeQuery(nativeQuery)
+                    .setParameter(1, account.getEmail())
+                    .setParameter(2, account.getPassword())
+                    .setParameter(3, account.getPhoneNumber())
+                    .setParameter(4, account.getAddress())
+                    .setParameter(5, account.getFullName())
+                    .setParameter(6, account.getBirthDate())
+                    .setParameter(7, account.getStatus())
+                    .setParameter(8, account.getId())
+                    .executeUpdate();
+            return impactedRow > 0;
+        }
+        return false;
+    }
     //TODO: Delete account
     @Transactional
     public boolean deleteAccount(String email){

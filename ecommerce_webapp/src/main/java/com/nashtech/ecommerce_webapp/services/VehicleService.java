@@ -30,21 +30,24 @@ public class VehicleService {
     //Create a vehicle
     public boolean createVehicle(Vehicle vehicle){
         UUID id = UUID.randomUUID();
-        String nativeQuery = "INSERT INTO Vehicle " +
-                "(id, name, color, dateOfManufacture, price, quantity, status, categoryID, brandID) " +
-                "VALUES (?,?,?,?,?,?,?,?,?)";
-        int impactedRow =  em.createNativeQuery(nativeQuery)
-                .setParameter(1, id )
-                .setParameter(2,  vehicle.getName())
+//        String nativeQuery = "INSERT INTO Vehicle " +
+//                "(id, name, color, dateOfManufacture, price, quantity, status, categoryID, brandID) " +
+//                "VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO [dbo].[Vehicle] (id,name,color,dateOfManufacture,price,quantity,status,categoryID,brandID,imageURL, description) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+        int row = em.createNativeQuery(sql)
+                .setParameter(1, id)
+                .setParameter(2, vehicle.getName())
                 .setParameter(3, vehicle.getColor())
                 .setParameter(4, vehicle.getDateOfManufacture())
                 .setParameter(5, vehicle.getPrice())
                 .setParameter(6, vehicle.getQuantity())
-                .setParameter(7, vehicle.getStatus())
-                .setParameter(8, vehicle.getCategory())
-                .setParameter(8, vehicle.getBrandID())
+                .setParameter(7, 1)
+                .setParameter(8, vehicle.getCategoryID())
+                .setParameter(9, vehicle.getBrandID())
+                .setParameter(10, vehicle.getImageURL())
+                .setParameter(11, vehicle.getDescription())
                 .executeUpdate();
-        return impactedRow > 0;
+        return row > 0;
     }
 
     //Get vehicle by ID
@@ -56,7 +59,7 @@ public class VehicleService {
 
     private Page<Vehicle> searchVehiclesByName(String name, int status, int page, int size){
         Pageable paging = PageRequest.of(page, size, Sort.by("dateOfManufacture"));
-        return this.repository.findByNameContainingAndStatusEquals(name, status, paging);
+        return this.repository.findAllByNameLikeAndStatusEquals("%"+name+"%", status, paging);
     }
 
     private Page<Vehicle> searchVehiclesByNameAndBrand(String name, UUID brandID, int status, int page, int size){
@@ -88,6 +91,11 @@ public class VehicleService {
         Pageable paging = PageRequest.of(page, size, Sort.by("dateOfManufacture"));
         return this.repository.findByCategoryIDEqualsAndStatusEquals(categoryID, status, paging);
     }
+    //test
+    public Page<Vehicle> searchVehiclesLikeName(String name, int page, int size){
+        Pageable paging = PageRequest.of(page,size);
+        return this.repository.findAllByNameLike("%"+name+"%", paging);
+    }
 
     //Get vehicles like name and status
     @Transactional
@@ -96,11 +104,10 @@ public class VehicleService {
         Pageable paging = PageRequest.of(page, size, Sort.by("dateOfManufacture"));
 
         Page<Vehicle> pageVehicles = null;
-
+        System.out.println(searchType);
         if (name == null){
             pageVehicles = this.repository.findAll(paging);
         } else{
-
             switch (searchType){
                 case "searchAll":
                     pageVehicles = this.repository.findByStatusEquals(status, paging); //search all with status
@@ -137,7 +144,7 @@ public class VehicleService {
         Optional<Vehicle> result = getVehicleByID(vehicle.getId());
         if (result.isPresent()){
             String nativeQuery =
-            "UPDATE Vehicle SET name = ? , color = ?, dateOfManufacture =?, price=?, quantity=?, status=?, categoryID=?, brandID=? " +
+            "UPDATE Vehicle SET name = ? , color = ?, dateOfManufacture =?, price=?, quantity=?, status=?, categoryID=?, brandID=?, imageURL = ?, description = ? " +
                     "WHERE id = ?";
             int impactedRow = em.createNativeQuery(nativeQuery)
                     .setParameter(1, vehicle.getName())
@@ -145,9 +152,12 @@ public class VehicleService {
                     .setParameter(3, vehicle.getDateOfManufacture())
                     .setParameter(4, vehicle.getPrice())
                     .setParameter(5, vehicle.getQuantity())
-                    .setParameter(6, vehicle.getStatus())
+                    .setParameter(6, vehicle.isStatus())
                     .setParameter(7, vehicle.getCategoryID())
-                    .setParameter(6, vehicle.getBrandID())
+                    .setParameter(8, vehicle.getBrandID())
+                    .setParameter(9, vehicle.getImageURL())
+                    .setParameter(10, vehicle.getDescription())
+                    .setParameter(11, vehicle.getId())
                     .executeUpdate();
             return impactedRow > 0;
         }
@@ -162,6 +172,12 @@ public class VehicleService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public List<Vehicle> getAllVehicles(){
+        List<Vehicle> result = repository.findAll();
+        return result;
     }
 
 

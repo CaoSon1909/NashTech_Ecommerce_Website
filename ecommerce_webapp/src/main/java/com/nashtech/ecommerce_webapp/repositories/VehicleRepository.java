@@ -16,8 +16,11 @@ import java.util.UUID;
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
 
+    //test
+    Page<Vehicle> findAllByNameLike(String name, Pageable pageable);
+
     //find by name and status
-    Page<Vehicle> findByNameContainingAndStatusEquals(String name, int status, Pageable pageable);
+    Page<Vehicle> findAllByNameLikeAndStatusEquals(String name, int status, Pageable pageable);
 
     //find by (name, brand, status)
     Page<Vehicle> findByNameContainingAndBrandIDEqualsAndStatusEquals(String name, UUID brandID, int status, Pageable pageable);

@@ -1,5 +1,6 @@
 package com.nashtech.ecommerce_webapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,8 @@ public class Category {
     private String description;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference(value = "vehicle_category")
+    @JsonIgnore
     private Set<Vehicle> vehicles = new HashSet<>();
 
     public Category(UUID id, String name, String description, Set<Vehicle> vehicles) {

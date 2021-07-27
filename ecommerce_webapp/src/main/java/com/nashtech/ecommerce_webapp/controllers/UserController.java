@@ -2,6 +2,8 @@ package com.nashtech.ecommerce_webapp.controllers;
 
 import com.nashtech.ecommerce_webapp.dtos.SigninRequestDTO;
 import com.nashtech.ecommerce_webapp.dtos.SigninResponseDTO;
+import com.nashtech.ecommerce_webapp.dtos.SignupRequestDTO;
+import com.nashtech.ecommerce_webapp.dtos.SignupResponseDTO;
 import com.nashtech.ecommerce_webapp.models.user.User;
 import com.nashtech.ecommerce_webapp.services.UserService;
 import org.apache.coyote.Response;
@@ -17,7 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 
-@RequestMapping("/users")
+
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class UserController {
 
@@ -28,21 +31,25 @@ public class UserController {
     private ModelMapper modelMapper;
 
 
-    @PostMapping("/signin")
-    public ResponseEntity<SigninResponseDTO> login(@RequestParam String username, @RequestParam String password){
-        System.out.println("login() is invoked - UserController");
-        SigninResponseDTO dto =  service.signIn(username, password);
-        return dto != null ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    @PostMapping("/public/signin")
+    public ResponseEntity<SigninResponseDTO> login(@RequestBody SigninRequestDTO dto){
+        SigninResponseDTO res =  service.signIn(dto.getEmail(), dto.getPassword());
+        return res != null ? new ResponseEntity<>(res, HttpStatus.OK) : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/signup")
-    public String signup(@RequestBody SigninRequestDTO dto){
-        return service.signUp(modelMapper.map(dto, User.class));
+    @PostMapping("/public/signup")
+    public ResponseEntity<String> signup(@RequestBody SignupRequestDTO dto){
+        User user = service.signUp(dto);
+        if (user != null){
+            return new ResponseEntity<>("Sign up success", HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>("Sign up fail", HttpStatus.NOT_FOUND);
     }
 
 
 
-    @GetMapping(value = "/accounts")
+    @GetMapping(value = "/api/v1/users")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getAccounts(){
         List<User> users = service.getAll();
         if (users.size()>0) {
@@ -51,21 +58,15 @@ public class UserController {
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/me")
-    public ResponseEntity<User> viewMyProfile(){
-        User user = service.whoAmI()
-    }
-
     //get user by email
-    @GetMapping(value = "/search")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping(value = "/public/search")
     public ResponseEntity<User> getAccountByEmail(@PathParam("email") String email){
         User result = service.getAccountByEmail(email);
         return result != null
                ? new ResponseEntity<>(result, HttpStatus.OK) : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/search/name")
+    @GetMapping(value = "api/v1/users/search")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getAccountsLikeName(@PathParam("searchValue") String searchValue){
         List<User> accounts = service.getAccountsLikeName(searchValue);
@@ -74,15 +75,15 @@ public class UserController {
                 : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-//    @PutMapping
-//    public ResponseEntity<Boolean> updateAccount(@RequestBody User account){
-//        boolean result = service.updateAccount(account);
-//        return result
-//                ? new ResponseEntity<>(true, HttpStatus.OK)
-//                : new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-//    }
+    @PutMapping(value = "api/v1/users/update")
+    public ResponseEntity<Boolean> updateAccount(@RequestBody User account){
+        boolean result = service.updateAccount(account);
+        return result
+                ? new ResponseEntity<>(true, HttpStatus.OK)
+                : new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+    }
 
-    @DeleteMapping("{email}")
+    @DeleteMapping("/api/v1/users/{email}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Boolean> deleteAccount(@PathVariable("email") String email){
         boolean result = service.deleteAccount(email);

@@ -27,7 +27,8 @@ public class CategoryService {
 
     @Transactional
     public List<Category> findAllCategories(){
-        return this.categoryRepository.findAll();
+        String sql = "SELECT * FROM Category";
+        return em.createNativeQuery(sql).getResultList();
     }
 
     @Transactional

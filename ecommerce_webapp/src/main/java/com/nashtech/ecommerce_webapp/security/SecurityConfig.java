@@ -12,8 +12,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -29,16 +37,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception{
         //Disable CSRF (cross site request forgery)
-        http.csrf().disable();
+        http.cors().and().csrf().disable();
 
         //No session will be created or use by spring security
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+//        http.cors().and().authorizeRequests().antMatchers("/api/v1/public/brands").permitAll();
 
         //Entry points
-        http.authorizeRequests()//
-                .antMatchers("/users/signin").permitAll()//
-                .antMatchers("/users/signup").permitAll()//
+        http.authorizeRequests()
+                .antMatchers("/public/signin").permitAll()//
+                .antMatchers("/public/signup").permitAll()//
+                .antMatchers("/api/v1/public/categories").permitAll()//
+                .antMatchers("/api/v1/public/brands").permitAll()//
+                .antMatchers("/api/v1/vehicles/all").permitAll()
+                .antMatchers("/api/v1/vehicles/details").permitAll()
                 .anyRequest().authenticated();
 
         //If user try to access a resource without having enough permissions
@@ -47,17 +60,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //Apply JWT
         http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider, myUserDetails));
     }
-
-//    @Override
-//    public void configure(WebSecurity web) throws Exception{
-//        //Allow swagger to be accessed without authentication
-//        web.ignoring().antMatchers("/v2/api-docs")
-//                .antMatchers("/swagger-resources/**")//
-//                .antMatchers("/swagger-ui.html")//
-//                .antMatchers("/configuration/**")//
-//                .antMatchers("/webjars/**")//
-//                .antMatchers("/public");
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,6 +72,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-
 
 }

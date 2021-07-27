@@ -1,6 +1,7 @@
 package com.nashtech.ecommerce_webapp.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,8 +29,12 @@ public class Vehicle implements Serializable {
     private float price;
     @Column(name = "quantity", nullable = false)
     private int quantity;
+    @Column(name = "imageURL")
+    private String imageURL;
+    @Column(name = "description")
+    private String description;
     @Column(name = "status", nullable = false)
-    private int status;
+    private boolean status;
     @Column(name = "categoryID", insertable = false, updatable = false)
     private UUID categoryID;
     @Column(name = "brandID", insertable = false, updatable = false)
@@ -38,16 +43,16 @@ public class Vehicle implements Serializable {
     //===========//
     @ManyToOne
     @JoinColumn(name = "categoryID")
-    @JsonBackReference
+    @JsonBackReference(value = "vehicle_category")
     private Category category;
 
     @ManyToOne
     @JoinColumn(name = "brandID")
-    @JsonBackReference
+    @JsonBackReference(value = "vehicle_brand")
     private Brand brand;
     //===========//
 
-    public Vehicle(UUID id, String name, String color, long dateOfManufacture, float price, int quantity, int status, Category category, Brand brand) {
+    public Vehicle(String imageURL,UUID id, String name, String color, long dateOfManufacture, float price, int quantity, boolean status, Category category, Brand brand) {
         this.id = id;
         this.name = name;
         this.color = color;
@@ -55,6 +60,7 @@ public class Vehicle implements Serializable {
         this.price = price;
         this.quantity = quantity;
         this.status = status;
+        this.imageURL = imageURL;
         this.category = category;
         this.brand = brand;
     }
@@ -65,7 +71,9 @@ public class Vehicle implements Serializable {
             ,@JsonProperty("dateOfManufacture") long dateOfManufacture
             ,@JsonProperty("price") float price
             ,@JsonProperty("quantity") int quantity
-            ,@JsonProperty("status") int status
+            ,@JsonProperty("status") boolean status
+            ,@JsonProperty("imageURL") String imageURL
+            ,@JsonProperty("description") String description
             ,@JsonProperty("categoryID") UUID categoryID
             ,@JsonProperty("brandID") UUID brandID) {
         this.id = id;
@@ -75,6 +83,8 @@ public class Vehicle implements Serializable {
         this.price = price;
         this.quantity = quantity;
         this.status = status;
+        this.imageURL = imageURL;
+        this.description = description;
         this.categoryID = categoryID;
         this.brandID = brandID;
     }

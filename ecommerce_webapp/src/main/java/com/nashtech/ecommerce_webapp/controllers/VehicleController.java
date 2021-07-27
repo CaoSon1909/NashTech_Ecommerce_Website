@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Slf4j
 public class VehicleController {
 
@@ -60,8 +62,61 @@ public class VehicleController {
         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @GetMapping("/vehicles/all")
+    @CrossOrigin(origins = "*", maxAge = 3600)
+    public ResponseEntity<List<Vehicle>> getAllVehicles(){
+        List<Vehicle> result = service.getAllVehicles();
+        if (result != null){
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value= "/vehicles", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> createVehicle(@RequestBody Vehicle vehicle){
+        boolean result = service.createVehicle(vehicle);
+        if (result){
+            return new ResponseEntity<>(true, HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+    }
+//=====================================
+    @GetMapping(value = "/vehicles/all/paging")
+    public ResponseEntity<Map<String, Object>> searchLikeName(
+            @RequestParam(defaultValue = "") String keyword
+            , @RequestParam(defaultValue = Constant.ZERO_BASED_PAGE_INDEX, value = "page") int page
+            , @RequestParam(defaultValue = Constant.SIZE_OF_PAGE_RETURNED, value = "size") int size){
+        Page<Vehicle> result = service.searchVehiclesLikeName(keyword, page, size);
+        if (result != null){
+            List<Vehicle> listResult = result.getContent();
+            int currentPage = result.getNumber();
+            long totalVehicles = result.getTotalElements();
+            int totalPages = result.getTotalPages();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("VEHICLES", listResult);
+            response.put("CURRENT_PAGE", currentPage);
+            response.put("TOTAL_VEHICLES", totalVehicles);
+            response.put("TOTAL_PAGE", totalPages);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    //view product details => permit all
+    @GetMapping(value = "/vehicles/details")
+    public ResponseEntity<Vehicle> viewDetailVehicle(@RequestParam(value = "id") UUID uuid){
+        Optional<Vehicle> result = service.getVehicleByID(uuid);
+        if (result.isPresent()){
+            return new ResponseEntity<>(result.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    //update product
     @PutMapping("/vehicles")
-    public ResponseEntity<String> updateVehicle(@RequestParam Vehicle vehicle){
+    public ResponseEntity<String> updateVehicle(@RequestBody Vehicle vehicle){
         boolean result = service.updateVehicle(vehicle);
         if (result){
             return new ResponseEntity<>("Update success", HttpStatus.OK);
@@ -69,6 +124,7 @@ public class VehicleController {
         return new ResponseEntity<>("Update fail", HttpStatus.NOT_FOUND);
     }
 
+    //delete product
     @DeleteMapping("/vehicles")
     public ResponseEntity<String> deleteVehicle(@RequestParam UUID id){
         boolean result = service.deleteVehicle(id);
@@ -77,7 +133,4 @@ public class VehicleController {
         }
         return new ResponseEntity<>("Delete fail", HttpStatus.NOT_FOUND);
     }
-
-
-
 }

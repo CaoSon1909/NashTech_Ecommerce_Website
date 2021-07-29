@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private  String secretKey = "secret-key";
-    private  Long expireLength = 360000L;
+    private  Long expireLength = 1200000L;
 
     @Autowired
     private MyUserDetails myUserDetails;

@@ -172,7 +172,7 @@ public class UserService{
     public boolean deleteAccount(String email){
         User result = getAccountByEmail(email);
         if (result != null){
-            String nativeQuery = "DELETE FROM Account WHERE email = ?";
+            String nativeQuery = "UPDATE Userr SET status = 0 WHERE email = ?";
             int impactedRow = em.createNativeQuery(nativeQuery)
                     .setParameter(1, email)
                     .executeUpdate();

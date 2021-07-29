@@ -49,7 +49,6 @@ public class UserController {
 
 
     @GetMapping(value = "/api/v1/users")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getAccounts(){
         List<User> users = service.getAll();
         if (users.size()>0) {
@@ -59,14 +58,14 @@ public class UserController {
     }
 
     //get user by email
-    @GetMapping(value = "/public/search")
+    @GetMapping(value = "/public/user")
     public ResponseEntity<User> getAccountByEmail(@PathParam("email") String email){
         User result = service.getAccountByEmail(email);
         return result != null
                ? new ResponseEntity<>(result, HttpStatus.OK) : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "api/v1/users/search")
+    @GetMapping(value = "/api/v1/users/search")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getAccountsLikeName(@PathParam("searchValue") String searchValue){
         List<User> accounts = service.getAccountsLikeName(searchValue);
@@ -75,7 +74,8 @@ public class UserController {
                 : new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping(value = "api/v1/users/update")
+    @PutMapping(value = "/api/v1/users/update")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Boolean> updateAccount(@RequestBody User account){
         boolean result = service.updateAccount(account);
         return result
@@ -83,9 +83,9 @@ public class UserController {
                 : new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/api/v1/users/{email}")
+    @DeleteMapping("/api/v1/users")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Boolean> deleteAccount(@PathVariable("email") String email){
+    public ResponseEntity<Boolean> deleteAccount(@PathParam("email") String email){
         boolean result = service.deleteAccount(email);
         return result
                 ? new ResponseEntity<>(true, HttpStatus.OK)
